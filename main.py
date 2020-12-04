@@ -6,7 +6,8 @@ from copy import deepcopy
 template_a = """resource "aws_organizations_organizational_unit" "{ou}" {obrace}
   name      = "${obrace}local.account_prefix{cbrace}-ou-{ou}"
   parent_id = aws_organizations_organization.organisation.roots[0].id
-  
+{cbrace}  
+
 """
 
 template_b = """    "{ou}" : {obrace}
@@ -23,12 +24,12 @@ wb = xlrd.open_workbook(loc)
 sheet = wb.sheet_by_index(0)
 
 
-#this function appends ou details to existing org.tf file
+#this function appends ou details to existing bayami-org/main.tf file
 def write_org_file(ou_str):
-    with open("src/org.tf", "r") as in_file:
+    with open("src/main.tf", "r") as in_file:
         buf = in_file.readlines()
 
-    with open("src/org.tf", "w") as out_file:
+    with open("src/main.tf", "w") as out_file:
         for line in buf:
             out_file.write(line)
             if line.strip().startswith('#OU_INSERT_BY_BAYAMI'):
