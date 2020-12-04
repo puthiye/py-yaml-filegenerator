@@ -1,1 +1,4 @@
-# py-yaml-filegenerator
+pip install xlrd
+pip install pyyaml
+
+
