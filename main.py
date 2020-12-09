@@ -1,6 +1,7 @@
 import xlrd
 import yaml
 import os.path
+import shutil
 from copy import deepcopy
 
 template_a = """resource "aws_organizations_organizational_unit" "{ou}" {obrace}
@@ -16,6 +17,7 @@ template_b = """    "{ou}" : {obrace}
     {cbrace}
 """
 
+ou_sets = set()
 yaml_data = []
 yml = {}
 
@@ -26,6 +28,7 @@ sheet = wb.sheet_by_index(0)
 
 #this function appends ou details to existing bayami-org/main.tf file
 def write_org_file(ou_str):
+
     with open("src/main.tf", "r") as in_file:
         buf = in_file.readlines()
 
@@ -41,8 +44,10 @@ def write_org_file(ou_str):
                 out_file.write(template_b.format(ou=ou_str, obrace="{", cbrace="}" ))
 
 
+
 #this function creates/appends accounts_map.yaml file
 def write_accnts_map(yaml_data):
+
     if os.path.isfile("src/accounts_map.yaml"):
         print("File exist, appending..")
         with open("src/accounts_map.yaml", "a") as out_file:
@@ -65,10 +70,17 @@ def main():
 
     # get all values in the col 0  - populate ou entries
     for ou_entry in sheet.col_values(0, start_rowx=1):
-        print("ou entry={}".format(ou_entry))
+        print("inside main: ou entry={}".format(ou_entry))
+        ou_sets.add(ou_entry)
+
+    #keep a backup of main.tf
+    shutil.copyfile('src/main.tf', 'src/main.tf.bkup')
+
+    #iterate over the deduplicate values
+    for ou_entry in ou_sets:
         write_org_file(ou_entry)
 
-    # get the row values, populate yaml file entries here
+    # get the row values, populate accounts_map.yaml file entries here
     for row in range(sheet.nrows):
         if row != 0:
             row_list = sheet.row_values(row)
